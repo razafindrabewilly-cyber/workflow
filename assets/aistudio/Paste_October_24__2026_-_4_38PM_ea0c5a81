@@ -1,0 +1,504 @@
+Cahier des charges : app de prospection Instagram
+24 oct. 2026 · @Willyro
+Une application web gratuite qui importe tes exports de prospects (CSV ou Excel), les nettoie, les note, écrit les messages de prospection et suit chaque conversation jusqu'à la vente, sans aucune API payante.
+Vision et périmètre
+L'app remplace trois outils séparés (nettoyage, qualification, suivi) par une seule interface, pensée pour un monteur vidéo freelance qui prospecte plusieurs niches : coachs business, K-beauty, coachs fitness, créateurs face cam YouTube Shorts.
+Le parcours complet :
+1. Import d'un fichier CSV ou Excel (Instant Data Scraper, résultats Google, tout autre export).
+2. Nettoyage automatique : lignes vides, doublons, images encodées, champs mélangés.
+3. Scoring de chaque prospect selon la niche choisie.
+4. Messages personnalisés prêts à copier : connexion, problème, offre, relance.
+5. Pipeline de suivi : de « à contacter » à « client ».
+6. Tableau de bord : indicateurs et graphiques sur toute ta prospection.
+Ce que l'app ne fait pas, volontairement : elle ne se connecte pas à Instagram, n'envoie aucun message et ne collecte rien elle-même. Tu envoies chaque message à la main. C'est ce qui protège ton compte, et ça évite toute API payante.
+Critères de réussite : un fichier de 500 lignes est classé en moins de 10 secondes ; un message se copie en un clic ; tu suis 200 prospects sans perdre le fil.
+Contraintes : gratuit, sans API
+Tout tourne dans le navigateur, sans serveur, sans abonnement et sans clé d'API.
+• Pas d'IA payante dans l'app. Les messages viennent d'un moteur de modèles avec variables et variantes. Un bouton « Copier le prompt IA » prépare un texte à coller dans Claude, ChatGPT ou Gemini en version gratuite si tu veux une réécriture.
+• Pas de base de données distante. Les données sont stockées dans le navigateur (IndexedDB). Un export et un import JSON servent de sauvegarde.
+• Hébergement gratuit : lancement en local avec npm run dev, puis mise en ligne sur Vercel, Netlify ou GitHub Pages si tu veux y accéder depuis plusieurs appareils.
+• Aucune connexion à Instagram, aucun compte à créer dans l'app.
+• Interface en français, dates et nombres au format français.
+• Limite à connaître : les données restent dans le navigateur utilisé. Il faut donc sauvegarder le JSON régulièrement. Une synchronisation en ligne (Supabase, offre gratuite) est une option de version 2, jamais un prérequis.
+Stack technique recommandée
+Tous ces outils sont gratuits et open source, et l'agent sait bien les utiliser.
+Besoin
+Outil
+Pourquoi
+Application
+React + Vite + TypeScript
+Démarrage rapide, très bien connu des agents IA
+Interface
+Tailwind CSS + shadcn/ui
+Composants propres sans design à créer
+Lecture CSV
+PapaParse
+Gère les gros fichiers et les cellules énormes
+Lecture et export Excel
+SheetJS (paquet xlsx)
+Lit .xlsx et .xls, écrit des .xlsx
+Stockage local
+Dexie (IndexedDB)
+Base dans le navigateur, sans serveur
+Tableaux
+TanStack Table
+Tri, filtres, pagination, sélection
+Kanban
+dnd-kit
+Glisser-déposer des cartes entre colonnes
+Graphiques
+Recharts
+Barres, lignes, entonnoir, camembert
+Dates
+date-fns (locale fr)
+Relances et rapports par période
+Fichiers lourds
+Web Worker
+Le nettoyage ne bloque pas l'écran
+Tests
+Vitest
+Vérifier le nettoyage et le scoring
+Fonctionnalités par module
+La version 1 couvre tout ce qui te fait gagner du temps dès la première semaine ; la version 2 ajoute le confort.
+Module
+Ce qu'il fait
+Version
+Import
+Glisser-déposer de fichiers CSV, XLSX ou XLS, plusieurs à la fois. Détection du séparateur et de l'encodage, choix de la feuille Excel, aperçu des 20 premières lignes.
+1
+Mapping des colonnes
+Détection automatique des colonnes par leur contenu (lien Instagram, abonnés, bio, titre), correction manuelle, mapping mémorisé par type de source.
+1
+Nettoyage
+Retire les lignes vides, les posts qui ne sont pas des profils, les images encodées et les doublons. Extrait pseudo, nom, abonnés, téléphone, email, ville, secteur. Affiche un rapport : combien de lignes retirées et pourquoi.
+1
+Anti-doublon global
+Compare chaque import à la base existante : un prospect déjà contacté n'est jamais réimporté ni recontacté.
+1
+Niches et scoring
+Réglages par niche (mots-clés, fourchette d'abonnés, problèmes, offres), score de 0 à 100 expliqué ligne par ligne, priorité A, B ou C, alertes (concurrent possible, gros compte).
+1
+Messages
+Séquence en 4 temps avec variantes, variables remplies automatiquement, champ « observation » obligatoire, copie en un clic, bouton « Copier le prompt IA ».
+1
+Liste des prospects
+Tableau avec recherche, filtres (niche, priorité, statut, ville), tri, notes, tags, ouverture du profil en un clic.
+1
+Pipeline
+Kanban en glisser-déposer, dates enregistrées à chaque changement de statut, relance proposée à J+4, vue « à faire aujourd'hui ».
+1
+Compteur du jour
+Barre de progression vers la limite de 10 nouveaux contacts par jour, réglable. Protège ton compte.
+1
+Tableau de bord
+Indicateurs clés et cinq graphiques sur ta prospection (voir plus bas).
+1
+Export et sauvegarde
+Export CSV et XLSX des prospects, sauvegarde et restauration complète en JSON.
+1
+Calendrier des relances
+Export .ics des relances à ajouter à Google Calendar.
+2
+Mode sombre, raccourcis clavier
+Confort d'usage.
+2
+Synchronisation en ligne
+Supabase offre gratuite, pour retrouver les données sur plusieurs appareils.
+2
+Extension Chrome
+Ajouter un prospect depuis Instagram en un clic.
+2
+Niches configurables
+Chaque niche est un préréglage modifiable dans l'app : mots-clés, fourchette d'abonnés, problèmes types, offres et messages. Tu peux dupliquer une niche ou en créer une nouvelle sans toucher au code. Les quatre niches ci-dessous sont livrées par défaut ; les problèmes et fourchettes sont des hypothèses de départ à ajuster avec tes premières réponses.
+Niche
+Qui cibler
+Abonnés idéaux
+Mots-clés de bio
+Problèmes fréquents
+Offre de départ
+Coach business
+Coachs, mentors, formateurs en entrepreneuriat qui parlent face caméra
+3 000 à 60 000
+coach, mentor, formation, business, entrepreneur, accompagne
+Manque de temps pour monter, accroche faible, pas de sous-titres
+Reels et Shorts face cam avec accroche et sous-titres, clips tirés de lives ou de podcasts
+Commerce beauté (K-beauty)
+Boutiques et marques indépendantes
+2 000 à 35 000
+skincare, k-beauty, boutique, cosmétique, soin
+Produits peu mis en scène, publication irrégulière, peu d'idées de Reels
+Reels produits, textures, routines et nouveautés
+Coach fitness
+Coachs sportifs et préparateurs physiques
+2 000 à 50 000
+coach, fitness, musculation, transformation, programme
+Peu de temps entre les séances, démonstrations mal valorisées
+Reels de conseils, démonstrations d'exercices, transformations (avec accord du client)
+Créateurs face cam YouTube Shorts
+Créateurs d'éducation, de business ou de sport
+1 000 à 100 000
+youtube, shorts, chaîne, podcast, créateur
+Rétention faible, montage très chronophage, rythme plat
+Shorts à fort rythme : coupes, sous-titres, b-roll, accroche de 3 secondes, boucle
+L'app gère aussi le champ plateforme (Instagram, YouTube, TikTok) : un export YouTube contient un lien de chaîne et un nombre d'abonnés, qu'elle doit reconnaître comme un export Instagram.
+Modèle de données
+Cinq tables dans la base locale : prospects, niches, événements, imports, réglages. Le prospect est la table centrale.
+Champ du prospect
+Type
+Rôle
+id
+texte unique
+Identifiant interne
+plateforme
+instagram, youtube, tiktok
+Origine du profil
+pseudo
+texte
+Unique avec la plateforme, sert de clé anti-doublon
+nom, urlProfil, bio
+texte
+Nettoyés depuis l'export
+abonnes
+nombre
+Converti depuis « 29,8 k » ou « 1,2 M »
+telephone, email, siteWeb, ville
+texte
+Extraits de la bio et des champs voisins
+secteur, nicheId
+texte
+Détectés, modifiables
+score, priorite, alertes
+nombre, A/B/C, liste
+Résultat du scoring avec le détail des points
+observation
+texte
+Phrase sincère sur son contenu, rédigée par toi
+varianteMessage
+texte
+Variante du message 1 utilisée, pour comparer les taux de réponse
+statut
+choix
+Étape du pipeline (tableau suivant)
+dateMsg1, dateReponse, dateRelance, prochaineAction
+dates
+Posées automatiquement au changement de statut
+valeurEstimee
+nombre en euros
+Montant espéré si la vente se fait
+raisonPerte
+choix
+Pas de réponse, pas intéressé, déjà équipé, budget, autre
+tags, notes
+liste, texte
+Libres
+importId, dateImport
+texte, date
+Traçabilité du fichier d'origine
+Chaque changement (statut, message envoyé, réponse, note) crée aussi un événement daté lié au prospect : c'est ce qui permet les graphiques dans le temps.
+Étape
+Statut
+1
+À contacter
+2
+Message 1 envoyé
+3
+A répondu
+4
+Problème identifié
+5
+Offre ou démo proposée
+6
+Démo livrée
+7
+Client
+8
+Perdu (avec la raison)
+Règles de nettoyage et de scoring
+Ces règles viennent du script clean_prospects.py, déjà testé sur ton fichier d'exemple (125 lignes, 70 prospects gardés, 12 en priorité A). L'app doit les reproduire, puis les rendre réglables. Deux critères sont nouveaux par rapport au script (mots-clés de la niche et date du dernier post) : en les désactivant dans les réglages, l'app doit retrouver exactement les résultats du script.
+Nettoyage, dans cet ordre
+1. Ignorer toute ligne sans lien de profil (instagram.com, youtube.com/@, tiktok.com/@).
+2. Ignorer les liens qui ne sont pas des profils : /p/, /reel/, /explore/, /stories/, /tags/, /locations/, /popular/, /accounts/.
+3. Le pseudo est le premier segment du lien. Les doublons sont retirés sans tenir compte des majuscules.
+4. Ignorer toute cellule de texte qui commence par data: (image encodée) ou http.
+5. Normaliser le texte (Unicode NFKC) : les lettres « fantaisie » comme 𝐒𝐚𝐢𝐧𝐭𝐅𝐫𝐚𝐧 deviennent des lettres normales ; les espaces multiples sont réduits.
+6. Nom affiché : retirer « (@pseudo) », « · Instagram » et la ville après « · », garder la partie avant |, • ou –. Si le résultat a plus de 3 mots, commence par un mot générique (salon de, boutique de, magasin, soins…) ou égale le pseudo, afficher @pseudo.
+7. Abonnés : « Plus de 29,8 k abonnés » devient 29 800 ; « 195K followers » devient 195 000 ; « 1,2 M » devient 1 200 000. Gérer l'espace insécable et la virgule décimale.
+8. Téléphone français : accepter les formats 01 23 45 67 89, +33 1 23 45 67 89 et 0123456789, mais refuser tout numéro collé à un autre chiffre (le code postal et le numéro dans « 75006 0982748914 » ne doivent pas se mélanger).
+9. Email : expression régulière classique.
+10. Ville : d'abord le code postal (75 Paris, 69 Lyon, 13 Marseille, etc.), puis une liste de villes connues.
+11. Secteur : compter les mots-clés de chaque secteur dans le texte, garder celui qui en a le plus.
+Scoring (0 à 100)
+Critère
+Points
+Abonnés entre 2 000 et 35 000
++40
+Abonnés entre 1 000 et 60 000 (hors zone précédente)
++25
+Abonnés entre 500 et 150 000 (hors zones précédentes)
++10
+Moins de 500 abonnés
+−15, alerte « très petit compte »
+Plus de 150 000 abonnés
+−10, alerte « probablement déjà équipé »
+Téléphone trouvé
++15
+Email trouvé
++10
+Signaux d'activité commerciale (boutique, shop, adresse, horaires, site web), 8 points chacun, maximum 3
+jusqu'à +24
+Bio de plus de 40 caractères
++5
+Mots-clés de la niche dans la bio, 10 points chacun, maximum 4
+jusqu'à +40
+Mots d'agence ou de concurrent (agency, studio, production, monteur, vidéaste, UGC, content creator)
+−20, alerte « peut être une agence ou un concurrent »
+Dernier post il y a moins de 7 jours, si l'export contient la date
++20
+Dernier post il y a moins de 30 jours
++10
+Priorité A à partir de 60 points, B de 40 à 59, C en dessous. Le score est limité entre 0 et 100, et chaque point est détaillé dans une infobulle pour que tu comprennes le classement.
+Tests obligatoires : « 29,8 k » donne 29 800, « 75006 0982748914 » donne uniquement 0982748914, et la ligne instagram.com/popular/ est rejetée.
+Messages de prospection
+La séquence suit ton approche : créer la connexion d'abord, identifier le problème, puis proposer le service. L'app écrit les textes à partir de modèles ; toi, tu ajoutes la remarque sincère qui les rend crédibles.
+Étape
+Quand
+But
+Message 1 : connexion
+Premier contact
+Aucune vente. Une remarque sincère sur son contenu, puis une question simple (« c'est vous qui gérez le compte ? »)
+Message 2 : problème
+Après sa réponse
+Une question ouverte avec trois pistes : manque de temps, manque d'idées, vidéos qui ne marchent pas
+Message 3 : offre
+Après avoir compris son problème
+Trois versions (temps, idées, résultats) qui proposent un échantillon gratuit de 20 à 30 secondes, sans engagement
+Relance
+4 jours sans réponse
+Un seul rappel, court, sans pression
+Variables remplies automatiquement : {nom}, {pseudo}, {ville}, {niche}, {secteur_adresses}, {secteur_comptes}, {offre}, {observation}.
+Règles de l'écran Messages
+• Chaque niche a au moins 3 variantes du message 1, réparties à tour de rôle. La variante utilisée est enregistrée pour comparer les taux de réponse.
+• Le bouton « Copier » du message 1 reste grisé tant que le champ observation est vide. Une case « envoyer sans observation » existe, avec un avertissement.
+• Vouvoiement ou tutoiement, réglable par niche.
+• Contrôle automatique du message 1 : alerte s'il dépasse 450 caractères, contient un lien, un prix, le mot « gratuit » ou des majuscules en rafale.
+• Le bouton « Copier le prompt IA » prépare un texte avec la bio, la niche et l'observation, demandant trois reformulations de moins de 400 caractères sans argumentaire de vente, à coller dans un chatbot gratuit.
+• Le bouton « Marquer comme envoyé » passe le prospect à « Message 1 envoyé », enregistre la date et la variante, et planifie la relance à J+4.
+Exemple de message 1, niche commerce beauté : « Bonjour 👋 Je suis tombé sur {nom} en cherchant des {secteur_adresses} à {ville} et j'ai tout de suite accroché sur l'univers de votre page. {observation} Petite question par curiosité : c'est vous qui gérez le compte au quotidien ? »
+Suivi et tableau de bord
+Pipeline. Huit colonnes, une par statut. Chaque carte affiche le nom, les abonnés, la priorité et le nombre de jours dans l'étape (en rouge au-delà de 4 jours sans activité). Glisser une carte change le statut, enregistre un événement daté et applique les règles : passage à « Message 1 envoyé » planifie la relance à J+4 ; passage à « Perdu » demande la raison. Un clic ouvre un panneau avec les notes, les messages et l'historique.
+Vue « À faire aujourd'hui ». Relances échues, messages 2 à envoyer aux prospects qui ont répondu, démos à relancer, et le compteur des nouveaux contacts du jour par rapport à la limite.
+Indicateurs clés
+Indicateur
+Calcul
+Prospects importés
+Total, et ceux du mois
+Contactés
+Statut « Message 1 envoyé » ou plus avancé
+Taux de réponse
+Prospects ayant répondu ÷ contactés
+Taux de problème identifié
+Problèmes identifiés ÷ réponses
+Taux d'acceptation de démo
+Démos livrées ÷ offres proposées
+Taux de conversion
+Clients ÷ contactés
+Chiffre d'affaires estimé
+Somme de la valeur estimée des clients
+Valeur du pipeline
+Somme de la valeur estimée des prospects encore en cours
+Délai moyen de réponse
+Jours entre le message 1 et la réponse
+Cinq graphiques
+1. Entonnoir : nombre de prospects à chaque étape, avec le pourcentage de passage d'une étape à la suivante.
+2. Activité par semaine : messages envoyés et réponses reçues, en barres groupées.
+3. Taux de réponse, avec un sélecteur « par niche / par priorité A, B, C / par variante du message 1 ». Le choix par priorité vérifie que ton scoring classe bien les meilleurs prospects.
+4. Répartition des prospects perdus selon la raison.
+5. Valeur du pipeline par statut.
+Filtres globaux : période (7 jours, 30 jours, 90 jours, tout), niche, plateforme. Si un groupe compte moins de 20 contacts, le graphique affiche « échantillon trop petit » plutôt qu'un pourcentage trompeur. Un état vide explique quoi faire quand il n'y a encore aucune donnée.
+Écrans de l'application
+Navigation par barre latérale, interface sobre, utilisable sur ordinateur et sur téléphone (les messages se copient souvent depuis le mobile).
+Écran
+Contenu principal
+Tableau de bord
+Indicateurs, cinq graphiques, bloc « À faire aujourd'hui », compteur de contacts du jour
+Importer
+Zone de dépôt, choix de la niche et de la plateforme, aperçu, correspondance des colonnes
+Rapport de nettoyage
+Avant et après (lignes lues, retirées par motif, gardées), aperçu des prospects classés, boutons Valider l'import ou Annuler
+Prospects
+Tableau filtrable et triable, sélection multiple, changement de statut en lot, export
+Fiche prospect
+Panneau latéral : bio, score détaillé, alertes, observation, notes, historique, boutons vers ses messages et son profil
+Messages
+Choix du prospect, séquence en 4 temps, copie en un clic, variante utilisée, bouton « Marquer comme envoyé »
+Pipeline
+Kanban en glisser-déposer, filtres par niche et priorité
+Niches et réglages
+Édition des niches (mots-clés, fourchettes, problèmes, offres, modèles de messages), limite quotidienne, vouvoiement ou tutoiement, nom et signature
+Sauvegarde
+Export CSV, XLSX, JSON, restauration, vidage complet des données
+Conformité et sécurité
+Ce qui suit est un cadre de bonnes pratiques, pas un avis juridique ; vérifie les règles de prospection B2B et de protection des données de ton pays.
+• Aucun envoi automatique. L'app prépare, tu envoies à la main, avec une limite quotidienne réglable (10 par défaut). C'est la meilleure protection de ton compte.
+• Aucune connexion Instagram, aucun mot de passe demandé ou stocké.
+• Données minimales : uniquement ce qui est publié par le prospect dans sa bio (nom, activité, ville, contact professionnel). Aucune donnée sensible.
+• Liste « Ne pas contacter » : un prospect qui refuse passe dans cet état, est exclu de toutes les listes et ne peut plus être réimporté.
+• Suppression facile : un bouton supprime un prospect et tout son historique ; un autre efface toute la base.
+• Durée de conservation : un rappel propose de supprimer les prospects sans contact depuis 3 ans (durée à confirmer selon ta réglementation).
+• Protection du code : le texte importé est toujours échappé à l'affichage (une bio ne doit jamais pouvoir exécuter du code), et à l'export CSV ou XLSX, toute cellule qui commence par =, +, - ou @ est précédée d'une apostrophe pour empêcher l'exécution de formules.
+• Aucun appel réseau vers un service tiers : l'app fonctionne hors ligne une fois chargée.
+Prompts : mise en route
+On construit l'app en 10 prompts courts, un par fonctionnalité, plutôt qu'en un seul énorme prompt. C'est plus fiable, et ça ménage le quota de l'agent gratuit.
+Avant de commencer
+1. Installe Node.js (version LTS) depuis nodejs.org : l'app en a besoin pour fonctionner. Redémarre ensuite ton terminal.
+2. Installe Antigravity depuis le site officiel de Google et connecte-toi avec ton compte Google.
+3. Crée un dossier prospection-app. Dedans, crée un dossier reference et mets-y clean_prospects.py et google.csv, et un dossier docs avec ce cahier des charges exporté en Markdown, nommé cahier-des-charges.md.
+4. Ouvre ce dossier dans Antigravity.
+5. Colle le prompt 0 dans les règles de l'espace de travail (Rules). Si ta version n'a pas cette option, crée un fichier PROJET.md à la racine avec ce texte et ajoute « relis PROJET.md avant de commencer » au début de chaque prompt.
+6. Envoie les prompts un par un, dans l'ordre. Après chacun, lance npm run dev, teste dans le navigateur, puis passe au suivant. En cas d'erreur, copie le message exact dans l'agent plutôt que de décrire le problème.
+Quota gratuit. L'offre gratuite d'Antigravity garde la saisie semi-automatique et les commandes illimitées, mais plafonne les tâches de l'agent, avec un quota qui se réinitialise chaque semaine. Google a réduit ces limites plusieurs fois depuis le lancement (CloudZero, 18 septembre 2026). Donc : prompts ciblés, un seul sujet à la fois, aucune demande « refais tout », et vérifie dans le sélecteur de modèles ce qui est disponible sur ton compte. Utilise le mode planification pour les gros prompts et le mode rapide pour les petites corrections.
+Prompt 0 : règles du projet
+Tu es mon développeur principal. Projet : ProspectFlow, une application web de prospection pour un monteur vidéo freelance (Reels, YouTube Shorts).
+
+OBJECTIF
+Importer des fichiers CSV ou Excel de prospects, les nettoyer, les noter par niche, générer des messages de prospection (connexion, problème, offre, relance), suivre les prospects dans un pipeline kanban et afficher un tableau de bord avec indicateurs et graphiques.
+
+CONTRAINTES ABSOLUES
+- 100 % gratuit : aucune API payante, aucune clé d'API, aucun backend, aucun service tiers obligatoire. Tout tourne dans le navigateur.
+- L'app n'appelle aucune IA : les messages viennent d'un moteur de modèles avec variables et variantes.
+- Stockage local avec IndexedDB (Dexie). Sauvegarde et restauration en JSON.
+- L'app n'envoie aucun message et ne se connecte jamais à Instagram.
+- Interface en français (libellés, dates, nombres). Code, noms de variables et commentaires en anglais.
+
+STACK
+React + Vite + TypeScript (mode strict), Tailwind CSS + shadcn/ui, React Router, PapaParse (CSV), SheetJS (paquet xlsx), Dexie, TanStack Table, dnd-kit, Recharts, date-fns (locale fr), Vitest.
+
+RÈGLES DE TRAVAIL
+- Un prompt = une fonctionnalité. Ne modifie rien de ce qui n'est pas demandé.
+- Avant de coder, propose un plan court (fichiers à créer ou modifier). Après, liste ce que je dois tester dans le navigateur.
+- Sépare la logique métier (src/lib, fonctions pures et testées) de l'interface (src/components, src/pages).
+- Les traitements lourds (gros fichiers) passent par un Web Worker.
+- Tout texte importé est échappé à l'affichage. À l'export CSV ou XLSX, préfixe d'une apostrophe toute cellule qui commence par = + - ou @.
+- Gère les états vides, le chargement et les erreurs avec des messages clairs en français.
+- Écris des tests Vitest pour chaque fonction de nettoyage et de scoring.
+- Fais des commits git petits et explicites après chaque fonctionnalité.
+- Le dossier reference contient clean_prospects.py (script Python déjà testé) et google.csv (fichier d'exemple). Ce sont la source de vérité des règles de nettoyage et de scoring : porte-les à l'identique en TypeScript.
+- Le fichier docs/cahier-des-charges.md décrit tout le produit. Relis la section concernée avant chaque tâche.
+Prompt 1 : squelette de l'application
+Initialise le projet ProspectFlow en suivant docs/cahier-des-charges.md (sections Stack technique, Écrans de l'application, Modèle de données).
+
+1. Crée une app Vite + React + TypeScript strict dans ce dossier. Installe Tailwind CSS, shadcn/ui, React Router, Dexie, PapaParse, xlsx, TanStack Table, dnd-kit, Recharts, date-fns et Vitest.
+2. Structure : src/pages, src/components, src/lib (clean, score, messages, stats), src/db (schéma Dexie), src/types, src/workers, src/data (niches par défaut).
+3. Layout : barre latérale (Tableau de bord, Importer, Prospects, Messages, Pipeline, Niches et réglages, Sauvegarde), contenu à droite, responsive avec menu en bas sur mobile.
+4. Types TypeScript et schéma Dexie pour Prospect, Niche, EventLog, ImportBatch et Settings, avec exactement les champs du tableau de la section Modèle de données. Index sur (platform, handle) unique, status, niche, priority.
+5. Une page vide par écran, avec titre et message d'état vide en français qui explique quoi faire.
+6. Thème sobre, police Inter, couleur principale indigo, mode clair.
+7. git init, premier commit, README avec les commandes npm install, npm run dev et npm test.
+
+À la fin, donne-moi la commande pour lancer l'app et ce que je dois voir à l'écran.
+Prompts : import et nettoyage
+Prompt 2 : importer un fichier
+Implémente l'écran Importer (cahier des charges, modules Import et Mapping des colonnes).
+
+1. Zone de glisser-déposer pour un ou plusieurs fichiers .csv, .xlsx et .xls. Lecture avec PapaParse (CSV : détecte le séparateur et l'encodage UTF-8) et SheetJS (Excel : si le classeur a plusieurs feuilles, un menu permet de choisir). Certaines cellules sont énormes (images encodées en base64) : l'import ne doit jamais planter ni les afficher.
+2. Aperçu des 20 premières lignes dans un tableau. Texte tronqué à 80 caractères, et toute cellule qui commence par data: est remplacée par [image].
+3. Avant l'import, choix de la niche (liste des niches) et de la plateforme (Instagram, YouTube, TikTok).
+4. Mapping des colonnes : pour chaque champ cible (profileUrl, title, followersText, bio, extra1, extra2), propose la colonne la plus probable en analysant le CONTENU des cellules, pas l'en-tête (ceux d'Instant Data Scraper sont illisibles : zReHs href, LC20lb, VwiC3b…). Exemples : la colonne dont plus de 50 % des valeurs contiennent instagram.com est profileUrl ; celle dont les valeurs contiennent abonnés ou followers est followersText. Je dois pouvoir corriger à la main.
+5. Mémorise le mapping dans Settings, associé à une signature des en-têtes, pour ne pas le refaire quand j'importe le même type de fichier.
+6. Bouton Lancer le nettoyage : pour l'instant, il passe les lignes mappées à une fonction cleanRows vide dans src/lib/clean.ts.
+7. Test : avec reference/google.csv, le mapping automatique doit être juste sans aucune correction.
+Prompt 3 : moteur de nettoyage
+Implémente le moteur de nettoyage dans src/lib/clean.ts et branche-le à l'écran Importer. Source de vérité : reference/clean_prospects.py et la section Règles de nettoyage et de scoring du cahier des charges. Porte les 11 règles à l'identique.
+
+1. Fonctions pures et testées : parseFollowers, cleanName, extractPhones, extractEmails, detectCity, detectSector, extractHandle, isProfileUrl, dedupe. Pour YouTube et TikTok, le pseudo est la partie après @ ; ignore /watch, /shorts et /video.
+2. Tests Vitest obligatoires :
+   - Plus de 29,8 k abonnés donne 29800 ; 195K followers donne 195000 ; 1,2 M abonnés donne 1200000.
+   - 75006 0982748914 donne uniquement 0982748914.
+   - K-beauty Paris 0187055496 12 Saint-Placide 75006 0982748914 donne deux numéros valides.
+   - Le titre Magasin fondé depuis 1984 donne @pseudo.
+   - Un nom écrit en lettres fantaisie Unicode devient du texte normal.
+   - instagram.com/popular/ et instagram.com/p/xxx/ sont rejetés.
+3. Exécute le nettoyage dans un Web Worker avec une barre de progression.
+4. Écran Rapport de nettoyage : lignes lues, lignes retirées par motif (vide, pas un profil, doublon dans le fichier, déjà en base), lignes gardées, aperçu des prospects nettoyés. Boutons Valider l'import (écrit dans Dexie avec un ImportBatch) et Annuler.
+5. Anti-doublon global : un prospect dont (platform, handle) existe déjà n'est pas réimporté, sauf si je coche Mettre à jour les données, et son statut n'est jamais remis à zéro. Un prospect au statut Ne pas contacter est toujours ignoré.
+6. Vérification finale : importe reference/google.csv. Résultat attendu : 125 lignes lues, 70 prospects gardés. Si ce n'est pas le cas, explique l'écart avant de corriger.
+Prompts : scoring et messages
+Prompt 4 : niches et scoring
+Implémente les niches et le scoring (cahier des charges : sections Niches configurables et Règles de nettoyage et de scoring).
+
+1. src/data/niches.ts : quatre niches par défaut (Coach business, Commerce beauté K-beauty, Coach fitness, Créateurs face cam YouTube Shorts). Pour chacune : id, nom, mots-clés de bio, fourchette idéale d'abonnés, problèmes types, offre de départ, formulations secteur_adresses et secteur_comptes, vouvoiement ou tutoiement, et modèles de messages (vides pour l'instant). Reprends les valeurs du tableau de la section Niches configurables.
+2. src/lib/score.ts : fonction pure scoreProspect(prospect, niche, settings) qui renvoie { score, priority, breakdown, alerts }. breakdown détaille chaque ligne de points (exemple : Abonnés entre 2 000 et 35 000 : +40). Barème exact de la section Règles de scoring ; score limité entre 0 et 100 ; priorité A à partir de 60, B de 40 à 59, C en dessous.
+3. Les seuils d'abonnés, les points, les mots de concurrents et les seuils de priorité sont dans Settings et modifiables, jamais écrits en dur. Deux options activables : bonus des mots-clés de la niche, et bonus de date du dernier post.
+4. Branche le scoring à l'import : chaque prospect gardé est noté avec la niche choisie.
+5. Tests Vitest : un compte de 29 800 abonnés avec téléphone et adresse donne la priorité A ; un compte de 542 200 abonnés déclenche l'alerte gros compte ; une bio contenant Skincare Agency déclenche l'alerte concurrent.
+6. Vérification : importe reference/google.csv avec la niche beauté et les deux options désactivées. Résultat attendu : 12 prospects en priorité A, 34 en B et 24 en C (comme dans reference/clean_prospects.py). Active ensuite les deux options et dis-moi ce qui change.
+Prompt 5 : messages
+Implémente le moteur de messages (cahier des charges : section Messages de prospection) dans src/lib/messages.ts et l'écran Messages.
+
+1. Moteur de modèles : remplace {nom}, {pseudo}, {ville}, {niche}, {secteur_adresses}, {secteur_comptes}, {offre}, {observation}. Si la ville est vide, supprime proprement le groupe à {ville} sans laisser d'espace ni de mot orphelin. Aucune IA.
+2. Chaque niche contient : au moins 3 variantes du message 1, un message 2, trois messages 3 (temps, idées, résultats) et une relance. Écris-les en français naturel, vouvoiement par défaut, en partant des textes de la fonction messages_for dans reference/clean_prospects.py, adaptés aux 4 niches. Message 1 : jamais de lien, de prix ni de vente, une remarque sincère et une question simple. Messages 3 : ils proposent un échantillon gratuit de 20 à 30 secondes, sans engagement.
+3. Répartition des variantes : à tour de rôle selon le nombre d'envois déjà faits par variante, pour que les trois soient testées équitablement.
+4. Écran Messages : liste des prospects à contacter (priorité A d'abord), choix d'un prospect, champ Observation (obligatoire pour activer le bouton Copier, avec une case Envoyer sans observation et un avertissement), les 4 messages avec un bouton Copier chacun, compteur de caractères, contrôle automatique (alerte si le message 1 dépasse 450 caractères, contient un lien, un prix, le mot gratuit ou des majuscules en rafale).
+5. Bouton Marquer comme envoyé pour le message 1 : statut Message 1 envoyé, date, variante enregistrée, relance planifiée à J+4, compteur du jour mis à jour. Même logique pour les messages suivants.
+6. Bouton Copier le prompt IA : copie un texte avec la bio, la niche et l'observation, qui demande 3 reformulations de moins de 400 caractères, sans argumentaire de vente.
+7. Tests Vitest : substitution des variables, suppression propre de la ville vide, répartition équitable des variantes.
+Prompts : prospects, pipeline et tableau de bord
+Prompt 6 : liste des prospects et fiche
+Implémente l'écran Prospects et la fiche prospect (cahier des charges : modules Liste des prospects et Export, section Conformité et sécurité).
+
+1. Tableau TanStack Table avec les colonnes : priorité (badge A, B, C coloré), nom, pseudo (lien qui ouvre le profil dans un nouvel onglet), abonnés, niche, ville, score, statut, prochaine action. Tri sur chaque colonne, recherche texte (nom, pseudo, bio), filtres (niche, priorité, statut, ville, plateforme, avec ou sans téléphone ou email), pagination à 50 lignes, sélection multiple.
+2. Actions en lot : changer le statut, ajouter un tag, exporter la sélection en CSV ou XLSX, supprimer (avec confirmation).
+3. Fiche prospect dans un panneau latéral : bio complète, score détaillé (breakdown en liste), alertes, observation modifiable, notes, tags, valeur estimée, historique des événements, boutons Voir ses messages et Ouvrir le profil.
+4. Case de qualification J'ai regardé 2 ou 3 de ses Reels, à cocher avant de passer aux messages.
+5. Statuts Ne pas contacter (le prospect disparaît de toutes les listes et ne peut plus être réimporté) et Perdu (fenêtre qui demande la raison).
+6. Chaque changement de statut crée un EventLog daté.
+7. Export CSV avec séparateur point-virgule et BOM UTF-8 pour Excel en français, export XLSX, avec protection contre l'injection de formules (apostrophe devant tout texte commençant par = + - ou @).
+8. États : tableau vide, aucun résultat, chargement.
+Prompt 7 : pipeline kanban
+Implémente l'écran Pipeline en kanban (cahier des charges : section Suivi et tableau de bord, parties Pipeline et Vue À faire aujourd'hui).
+
+1. Huit colonnes : À contacter, Message 1 envoyé, A répondu, Problème identifié, Offre ou démo proposée, Démo livrée, Client, Perdu. Utilise dnd-kit. Chaque colonne affiche son nombre de cartes et la valeur estimée totale.
+2. Carte : nom, abonnés, badge de priorité, niche, nombre de jours dans l'étape (en rouge au-delà de 4 jours sans activité). Un clic ouvre la fiche prospect.
+3. Glisser une carte change le statut, crée un EventLog et applique les règles : vers Message 1 envoyé, enregistre dateMsg1 et planifie la relance à J+4 ; vers A répondu, enregistre dateReponse ; vers Client, demande la valeur estimée ; vers Perdu, demande la raison.
+4. Filtres en haut : niche, priorité, recherche. La colonne À contacter affiche 30 cartes avec un bouton Voir plus.
+5. Vue À faire aujourd'hui, en haut du Pipeline : relances échues, prospects qui ont répondu sans message 2, démos livrées sans retour depuis 3 jours, et compteur Contacts du jour sur la limite avec barre de progression.
+6. Utilisable au clavier et au tactile ; sur mobile, les colonnes défilent horizontalement.
+7. Tests Vitest sur les règles de transition de statut.
+Prompt 8 : tableau de bord
+Implémente le Tableau de bord (cahier des charges : section Suivi et tableau de bord, parties Indicateurs clés et Cinq graphiques). Calculs dans src/lib/stats.ts (fonctions pures et testées) à partir des prospects et des EventLog.
+
+1. Cartes d'indicateurs : prospects importés (total et du mois), contactés, taux de réponse, taux de problème identifié, taux d'acceptation de démo, taux de conversion, chiffre d'affaires estimé, valeur du pipeline, délai moyen de réponse. Chaque carte montre l'évolution par rapport à la période précédente quand c'est possible.
+2. Filtres globaux : période (7 jours, 30 jours, 90 jours, tout), niche, plateforme.
+3. Cinq graphiques avec Recharts : (1) entonnoir avec le pourcentage de passage d'une étape à l'autre ; (2) activité par semaine, messages envoyés et réponses, en barres groupées ; (3) taux de réponse avec un sélecteur par niche, par priorité A, B, C ou par variante du message 1 ; (4) répartition des prospects perdus par raison ; (5) valeur du pipeline par statut.
+4. Si un groupe compte moins de 20 contacts, affiche échantillon trop petit au lieu du pourcentage.
+5. Reprends le bloc À faire aujourd'hui en haut de page.
+6. États vides pédagogiques. Légendes et infobulles en français, couleurs lisibles par les daltoniens, jamais la couleur seule pour porter une information.
+7. Bouton Remplir avec des données de démonstration (200 prospects fictifs répartis sur 8 semaines) pour tester les graphiques, et bouton Supprimer la démo.
+8. Tests Vitest sur stats.ts avec un jeu de données fixe.
+Prompts : réglages, finitions et mise en ligne
+Prompt 9 : niches, réglages et sauvegarde
+Implémente les écrans Niches et réglages et Sauvegarde (cahier des charges : modules Niches et scoring, Compteur du jour, Export et sauvegarde).
+
+1. Niches : liste, création, duplication et suppression (impossible si des prospects y sont rattachés ; propose de les déplacer). Formulaire d'édition : nom, mots-clés de bio (sous forme de puces), fourchette idéale d'abonnés, problèmes types, offre, formulations secteur_adresses et secteur_comptes, vouvoiement ou tutoiement, et éditeur des modèles de messages (au moins 3 variantes du message 1, un message 2, trois messages 3, une relance) avec la liste des variables cliquables à insérer et un aperçu sur un prospect fictif.
+2. Réglages : limite quotidienne de nouveaux contacts (10 par défaut), délai de relance (4 jours), barème du scoring (points et seuils), mots de concurrents, options de bonus (mots-clés de niche, date du dernier post), nom utilisé pour signer les messages.
+3. Bouton Rétablir les valeurs par défaut pour chaque niche et pour le barème.
+4. Sauvegarde : export JSON complet (prospects, niches, événements, imports, réglages) avec la date dans le nom du fichier ; import JSON avec le choix Remplacer ou Fusionner et l'affichage du nombre d'éléments avant validation ; rappel si la dernière sauvegarde a plus de 7 jours ; bouton Supprimer toutes les données avec double confirmation.
+5. Tests Vitest sur la fusion de sauvegardes : aucun doublon, et le statut le plus avancé l'emporte.
+Prompt 10 : finitions et mise en ligne gratuite
+Phase de finition. N'ajoute aucune nouvelle fonctionnalité.
+
+1. Relis docs/cahier-des-charges.md et vérifie chaque module. Donne-moi la liste de ce qui est fait, partiel ou manquant, sans rien corriger encore.
+2. Corrige ensuite, un par un, uniquement les manques de la version 1.
+3. Performance : l'import de 5 000 lignes doit rester fluide (Web Worker, tableaux paginés).
+4. Accessibilité : navigation au clavier, focus visible, contrastes suffisants, libellés sur les boutons à icône.
+5. Mobile : vérifie les écrans Messages, Pipeline et Tableau de bord en largeur 390 px.
+6. Sécurité : vérifie l'échappement des textes importés et la protection des exports contre l'injection de formules.
+7. Lance npm test et npm run build, et corrige les erreurs.
+8. Mise en ligne gratuite : prépare un déploiement statique sur Vercel (ou GitHub Pages), sans variable d'environnement ni secret, et écris dans le README les étapes pas à pas.
+9. Ajoute une page Aide : comment exporter depuis Instant Data Scraper, comment importer, l'ordre de travail conseillé (importer, vérifier, regarder 2 Reels, copier le message, marquer comme envoyé) et les règles de prudence (10 contacts par jour, aucune automatisation).
+Après chaque prompt, la même vérification : les tests passent (npm test), l'app démarre (npm run dev), ce qui était demandé fonctionne dans le navigateur, et l'agent a fait un commit. Sinon, ne passe pas au prompt suivant.
+Prompts utiles ensuite
+• Corriger un bug : « Voici l'erreur exacte : [coller le message]. Trouve la cause, corrige uniquement cela et ajoute un test qui l'aurait détectée. »
+• Nouveau type d'export : « J'ai un nouveau fichier dans reference/. Analyse ses colonnes, ajoute un profil de mapping automatique et un test. Ne touche pas au scoring. »
+• Nouvelle niche : pas besoin de code, tu la crées dans l'écran Niches et réglages.
+• Version 2 : demande une seule fonctionnalité à la fois (export .ics des relances, mode sombre, synchronisation Supabase, extension Chrome), avec le même format de prompt : objectif, étapes numérotées, tests, vérification attendue.
